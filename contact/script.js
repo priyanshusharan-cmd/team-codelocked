@@ -5,7 +5,6 @@
   const section = document.querySelector('.scrolly');
   const stage = section.querySelector('.stage');
   const hero = stage.querySelector('.hero');
-  const glow = stage.querySelector('.glow');
   const frameBg = stage.querySelector('.frame-bg');
   const frameHead = stage.querySelector('.frame-head');
   const slots = [...stage.querySelectorAll('.slot')];
@@ -95,7 +94,6 @@
     hero.style.transform = `translateY(${-50 * hp}px) scale(${1 - 0.06 * hp})`;
     hero.style.visibility = hp >= 1 ? 'hidden' : '';
     hero.style.pointerEvents = hp > 0.5 ? 'none' : '';
-    glow.style.opacity = (1 - 0.6 * hp).toFixed(3);
 
     // Frame chrome fades in as the cards land
     const fp = ease(clamp((p - 0.16) / 0.34));
@@ -123,27 +121,6 @@
   document.fonts?.ready.then(measure);
   measure();
 
-  // ───────── Rotating "Let's talk …" words ─────────
-  const track = document.querySelector('.rotor-track');
-  const words = [...track.children];
-  let idx = 0;
-  if (!reduceMotion.matches) {
-    setInterval(() => {
-      if (document.hidden) return;
-      idx = (idx + 1) % words.length;
-      track.style.transform = `translateY(${-idx * words[0].offsetHeight}px)`;
-    }, 2200);
-  }
-
-  // ───────── Pre-select the form reason from CTAs ─────────
-  const reason = document.getElementById('reason');
-  document.getElementById('say-hi').addEventListener('click', () => {
-    reason.value = words[idx].dataset.reason;
-  });
-  document.querySelectorAll('a[data-reason]').forEach((a) =>
-    a.addEventListener('click', () => (reason.value = a.dataset.reason))
-  );
-
   // ───────── Contact form (no backend yet) ─────────
   const form = document.getElementById('contact-form');
   const status = form.querySelector('.form-status');
@@ -157,13 +134,13 @@
     });
     if (firstBad) {
       status.className = 'form-status err';
-      status.textContent = 'Please fill in your name, a valid email and a message.';
+      status.textContent = 'Add your name, email and a message.';
       firstBad.focus();
       return;
     }
-    // TODO: send to the backend / form service the team chooses.
+    // TODO: static site — post to a form service (e.g. Formspree) here.
     status.className = 'form-status ok';
-    status.textContent = 'Thanks! The form isn’t connected yet, so please DM us on Instagram for now.';
+    status.textContent = 'Thanks, we’ll get back to you.';
     form.reset();
   });
 })();
