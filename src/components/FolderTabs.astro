@@ -13,7 +13,7 @@ const links: { label: string; href: string; external?: boolean }[] = [
 ];
 ---
 <header class="tabs-bar">
-  <a class="brand" href={`${base}/`} aria-label="TeamCodeLocked home"><img class="logo" src={`${base}/brand/logo-hex.webp`} alt="" width="34" height="32" />TCLD&nbsp;/</a>
+  <a class="brand" href={`${base}/`} aria-label="TeamCodeLocked home"><img class="logo" src={`${base}/brand/logo-hex.webp`} alt="" width="28" height="26" />TCLD&nbsp;/</a>
   <nav aria-label="Main">
     <ul class="tabs">
       {links.map((l) => (
@@ -42,8 +42,8 @@ const links: { label: string; href: string; external?: boolean }[] = [
 
 <style>
   .tabs-bar { display: flex; align-items: flex-end; gap: var(--s-5); padding: 0 calc(var(--desk-margin) + 28px); height: 56px; }
-  .logo { width: 34px; height: 32px; object-fit: cover; clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); margin-right: 10px; }
-  .brand { display: inline-flex; align-items: center; color: var(--text); font: 800 1.125rem/1 var(--font-display); font-variation-settings: "wdth" 70; text-decoration: none; padding-bottom: 12px; letter-spacing: 0.01em; }
+  .logo { width: 28px; height: 26px; object-fit: cover; clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); margin-right: 10px; }
+  .brand { display: inline-flex; align-items: center; color: var(--text); font: 800 1.125rem/1 var(--font-display); font-variation-settings: "wdth" 70; text-decoration: none; height: 34px; padding-bottom: 0; letter-spacing: 0.01em; }
   .tabs { display: flex; gap: 6px; list-style: none; padding: 0; }
   .tab {
     display: block; padding: 11px 22px 10px; border-radius: var(--r-tab) var(--r-tab) 0 0;
