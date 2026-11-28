@@ -11,15 +11,15 @@ const { emails = false, animated = false } = Astro.props;
 
 // gentle offsets: [x vw, y vh, rotation deg]
 const drift: [number, number, number][] = [
-  [-18, -14, -12], [4, 18, 10], [22, -10, 13],
-  [-24, 10, 11], [6, -16, -10], [26, 14, -13],
-  [-20, -8, -11], [2, 16, 12], [24, -12, 14],
+  [-26, -20, -13], [0, -26, 11], [28, -18, 14],     // top row: up-left, up, up-right
+  [-32, 4, 12], [2, 24, -10], [32, 2, -14],         // middle: left, down, right
+  [-24, 26, -12], [-4, 30, 13], [26, 24, 15],       // bottom: down-left, down, down-right
 ];
 const headStyle = (i: number) =>
-  `--sx:${drift[i][0]}vw;--sy:${drift[i][1]}vh;--sr:${drift[i][2]}deg;--ss:0.86;--land:${34 + i * 3}%`;
+  `--sx:${drift[i][0]}vw;--sy:${drift[i][1]}vh;--sr:${drift[i][2]}deg;--ss:0.86;--land:${48 + i * 3}%`;
 ---
 <div class:list={['board', { animated }]}>
-  <div class="fac cell" data-team="All" style={animated ? '--sx:16vw;--sy:8vh;--sr:-9deg;--ss:0.88;--land:62%' : undefined}>
+  <div class="fac cell" data-team="All" style={animated ? '--sx:-14vw;--sy:-12vh;--sr:-10deg;--ss:0.88;--land:78%' : undefined}>
     <PersonFile name={faculty.name} role={faculty.role} photo={faculty.photo} size="lg" />
   </div>
   <div class="heads">
