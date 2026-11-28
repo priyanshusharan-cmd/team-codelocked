@@ -14,3 +14,14 @@ dist/
 # full-size originals (site uses the .webp copies)
 public/images/events/*.png
 public/images/events/*.jpeg
+
+# planning docs (kept locally, not published)
+WEBSITE_PROMPT.md
+PRODUCT.md
+OPEN_QUESTIONS.md
+CONSENT.md
+TEAM_DETAILS.md
+DEMO_SITE_REFERENCE.md
+copy/
+.impeccable/
+public/images/team/README.md
