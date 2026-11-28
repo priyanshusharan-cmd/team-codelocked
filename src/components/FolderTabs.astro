@@ -44,16 +44,21 @@ const links: { label: string; href: string; external?: boolean }[] = [
   .tabs-bar { display: flex; align-items: flex-end; gap: var(--s-5); padding: 0 calc(var(--desk-margin) + 28px); height: 56px; }
   .logo { width: 28px; height: 26px; object-fit: cover; clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); margin-right: 10px; }
   .brand { display: inline-flex; align-items: center; color: var(--text); font: 800 1.125rem/1 var(--font-display); font-variation-settings: "wdth" 70; text-decoration: none; height: 34px; padding-bottom: 0; letter-spacing: 0.01em; }
-  .tabs { display: flex; gap: 6px; list-style: none; padding: 0; }
+  .tabs { display: flex; gap: 2px; list-style: none; padding: 0; }
   .tab {
-    display: block; padding: 11px 22px 10px; border-radius: var(--r-tab) var(--r-tab) 0 0;
-    background: var(--folder-3); color: var(--text-soft); text-decoration: none;
-    font: 700 0.8125rem/1 var(--font-typed); letter-spacing: 0.06em; text-transform: uppercase;
-    transition: transform var(--dur-hover) var(--ease-out), background-color var(--dur-hover) var(--ease-out);
+    position: relative; display: block; padding: 12px 18px 11px; border-radius: var(--r-tab) var(--r-tab) 0 0;
+    background: transparent; color: var(--text-soft); text-decoration: none;
+    font: 600 0.9375rem/1 var(--font-text); letter-spacing: 0.01em;
+    transition: color var(--dur-hover) var(--ease-out), background-color var(--dur-hover) var(--ease-out);
+  }
+  .tab::after {
+    content: ""; position: absolute; left: 18px; right: 18px; bottom: 6px; height: 2px; background: var(--teal);
+    transform: scaleX(0); transform-origin: left; transition: transform var(--dur-small) var(--ease-out);
   }
   .tab.on { background: var(--folder); color: var(--text); }
   @media (hover: hover) and (pointer: fine) {
-    .tab:not(.on):hover { transform: translateY(-4px); background: var(--folder-hover); color: var(--text); }
+    .tab:not(.on):hover { color: var(--text); }
+    .tab:not(.on):hover::after { transform: scaleX(1); }
   }
   .tab:focus-visible { outline-offset: -4px; }
   .menu-btn { display: none; }
