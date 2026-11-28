@@ -33,6 +33,10 @@ const fullTitle = title ? `${title} · TeamCodeLocked` : 'TeamCodeLocked · BMSC
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
     {noindex && <meta name="robots" content="noindex" />}
     <script is:inline>
+      // Always open at the top of the page (don't restore an old scroll spot or a #section)
+      try { history.scrollRestoration = 'manual'; } catch (e) {}
+      if (location.hash && !sessionStorage.getItem('tcld_nav')) { history.replaceState(null, '', location.pathname + location.search); }
+      addEventListener('load', () => { if (!location.hash) scrollTo(0, 0); try { sessionStorage.setItem('tcld_nav', '1'); } catch (e) {} });
       // Entrance animations play once per session; afterwards pages render settled.
       try {
         if (sessionStorage.getItem('tcld_opened')) document.documentElement.dataset.entered = '';
