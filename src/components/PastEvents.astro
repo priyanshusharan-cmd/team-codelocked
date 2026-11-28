@@ -86,7 +86,7 @@ const copies = [0, 1, 2];
     const tick = (now: number) => {
       const dt = Math.min(64, now - last); last = now;
       const visible = vp.getBoundingClientRect().bottom > 0 && vp.getBoundingClientRect().top < innerHeight;
-      if (!paused && !hovering && !vp.contains(document.activeElement) && now > userUntil && visible && !document.hidden) {
+      if (!paused && !vp.contains(document.activeElement) && now > userUntil && visible && !document.hidden) {
         pos += SPEED * (dt / 16.67);
         vp.scrollLeft = pos;
         wrap(); pos = vp.scrollLeft + (pos % 1);
