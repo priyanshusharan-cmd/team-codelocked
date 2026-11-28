@@ -48,20 +48,20 @@ import { site, events, crews, heads, img, href } from '../data/site';
     <Folder id="about" label="What we do">
       <div class="about">
         <h2 class="h2">What we do</h2>
-        <div class="about-grid">
-          <a class="block big link-block" href={href('/events')}>
+        <div class="about-grid scatter">
+          <a class="block big link-block scatter-item" style="--sx:-14vw;--sy:10vh;--sr:-4deg;--land:40%" href={href('/events')}>
             <div class="posters">
-              {events.map((e) => <img src={e.poster} alt="" loading="lazy" decoding="async" />)}
+              {events.map((e, i) => <img class="scatter-item" style={`--sx:${(i - 1) * 8}vw;--sy:-6vh;--sr:${(i - 1) * 9}deg;--land:${44 + i * 4}%`} src={e.poster} alt="" loading="lazy" decoding="async" />)}
             </div>
             <h3>Events</h3>
             <p>Escape rooms, a Jenga mystery and memory hunts at Utsav. <span class="go">See events →</span></p>
           </a>
-          <a class="block link-block" href={site.bitbybit} target="_blank" rel="noopener">
+          <a class="block link-block scatter-item" style="--sx:-10vw;--sy:18vh;--sr:5deg;--land:48%" href={site.bitbybit} target="_blank" rel="noopener">
             <code class="mark" aria-hidden="true">while (true) solve();</code>
             <h3>BitByBit</h3>
             <p>Our own coding platform, with weekly contests. <span class="go">Open BitByBit ↗</span><span class="sr-only"> (opens in a new tab)</span></p>
           </a>
-          <a class="block link-block" href={href('/team')}>
+          <a class="block link-block scatter-item" style="--sx:12vw;--sy:18vh;--sr:-5deg;--land:52%" href={href('/team')}>
             <div class="faces" aria-hidden="true">
               {heads.filter((h) => h.photo).slice(0, 5).map((h) => <img src={h.photo} alt="" loading="lazy" decoding="async" />)}
             </div>
