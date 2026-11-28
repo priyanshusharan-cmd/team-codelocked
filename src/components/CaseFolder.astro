@@ -1,0 +1,59 @@
+---
+import Stamp from './Stamp.astro';
+// One event = one case folder in its own flat colour. Rests low, slides up on hover.
+interface Props {
+  no: string;              // "01"
+  title: string;
+  dateLabel: string;       // "17 Apr"
+  href: string;
+  color: string;           // CSS colour (a --case-* token)
+  poster?: string;
+  status: 'Open' | 'Registrations open' | 'Full' | 'Solved' | 'Archived';
+  facts?: { label: string; value: string }[];
+  ink?: 'light' | 'dark';
+  slug?: string;
+  mini?: boolean;          // hero peek: colour, number, title only
+}
+const { no, title, dateLabel, href, color, poster, status, facts = [], ink = 'light', slug, mini = false } = Astro.props;
+---
+<a class:list={['case', ink, { mini }]} href={href} style={`--case:${color}`}>
+  <div class="face">
+    <span class="no num">No. {no} · {dateLabel}</span>
+    <h3 class="title">{title}</h3>
+    {facts.length > 0 && (
+      <dl class="facts">
+        {facts.map((f) => (<div><dt>{f.label}</dt><dd class="num">{f.value}</dd></div>))}
+      </dl>
+    )}
+    {!mini && <span class="status"><Stamp tone="current" size="sm">{status}</Stamp></span>}
+  </div>
+  {poster && !mini && <img class="poster" src={poster} alt="" loading="lazy" decoding="async"
+                  style={slug ? `view-transition-name:poster-${slug}` : undefined} />}
+</a>
+
+<style>
+  .case {
+    position: relative; display: grid; grid-template-columns: 1fr 38%; min-height: 220px;
+    background: var(--case); color: #fff; text-decoration: none; border-radius: var(--r-folder) var(--r-folder) 0 0;
+    overflow: hidden; transform: translateY(var(--rest, 40px));
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+  .case.dark { color: var(--text); }
+  @media (hover: hover) and (pointer: fine) { .case:hover { transform: translateY(0); } }
+  @media (hover: none) { .case { --rest: 0px; } }
+  .case:focus-visible { transform: translateY(0); outline-offset: -4px; outline-color: #fff; }
+  .case:active { transform: translateY(0) scale(0.985); }
+  .face { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .no { font: 700 0.75rem/1.2 var(--font-typed); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.9; }
+  .title { font: 900 clamp(1.5rem, 2.4vw, 2rem)/0.92 var(--font-display); font-variation-settings: "wdth" 66; text-transform: uppercase; overflow-wrap: anywhere; }
+  .facts { display: grid; gap: 4px; margin: 2px 0 0; font: 400 0.8125rem/1.3 var(--font-text); }
+  .facts div { display: flex; gap: 6px; }
+  .facts dt { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.6875rem; padding-top: 1px; min-width: 52px; }
+  .facts dd { margin: 0; }
+  .status { margin-top: auto; }
+  .poster { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+  .mini { grid-template-columns: 1fr; min-height: 132px; --rest: 28px; }
+  .mini .face { padding: 14px 16px; gap: 6px; }
+  .mini .title { font-size: clamp(1.125rem, 1.6vw, 1.5rem); }
+  @media (prefers-reduced-motion: reduce) { .case { transition: none; } }
+</style>

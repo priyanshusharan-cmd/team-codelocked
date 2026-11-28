@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FolderTabs from '../components/FolderTabs.astro';
+import PageHero from '../components/PageHero.astro';
+import Folder from '../components/Folder.astro';
+import TearOffSlips from '../components/TearOffSlips.astro';
+import Footer from '../components/Footer.astro';
+import { site, heads } from '../data/site';
+---
+<BaseLayout title="Contact" description="Contact TeamCodeLocked, the tech club of BMS College of Engineering, Bengaluru.">
+  <FolderTabs current="Contact" />
+  <main id="main" class="page-main">
+    <PageHero split title="Contact" lede="Questions about the club, events or working with us.">
+      <a slot="actions" class="big-mail" href={`mailto:${site.email}`}>{site.email}</a>
+      <div slot="right">
+        <TearOffSlips title="Take a slip" note="Tap one to copy or open it." slips={[
+          { label: 'Email', value: site.email },
+          { label: 'Instagram', value: '@teamcodelocked', href: site.instagram },
+          { label: 'LinkedIn', value: 'TeamCodeLocked', href: site.linkedin },
+          { label: 'BitByBit', value: 'BitByBit', href: site.bitbybit },
+        ]} />
+      </div>
+    </PageHero>
+
+    <Folder label="Heads">
+      <h2 class="h2">Reach a head</h2>
+      <table class="heads">
+        <thead class="sr-only"><tr><th>Role</th><th>Name</th><th>Email</th></tr></thead>
+        <tbody>
+          {heads.map((h) => (
+            <tr><td class="typed role">{h.role}</td><td class="name">{h.name}</td><td><a href={`mailto:${h.email}`}>{h.email}</a></td></tr>
+          ))}
+        </tbody>
+      </table>
+    </Folder>
+
+    <Folder label="Where">
+      <div class="where">
+        <h2 class="h2">Find us</h2>
+        <p class="lede">BMS College of Engineering, Bull Temple Road, Basavanagudi, Bengaluru.</p>
+        <a class="maps" href="https://maps.google.com/?q=BMS+College+of+Engineering+Bengaluru" target="_blank" rel="noopener">See on Maps →</a>
+      </div>
+    </Folder>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .big-mail { font: 700 clamp(1.125rem, 2vw, 1.5rem)/1.2 var(--font-text); color: var(--teal); overflow-wrap: anywhere; }
+  .heads { width: 100%; border-collapse: collapse; margin-top: var(--s-6); }
+  .heads td { padding: 16px 12px 16px 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+  .heads tr:first-child td { border-top: 1px solid var(--line); }
+  .role { color: var(--text-soft); width: 26%; }
+  .name { font: 800 1.25rem/1.1 var(--font-display); font-variation-settings: "wdth" 80; text-transform: uppercase; width: 30%; }
+  .heads a { color: var(--teal); overflow-wrap: anywhere; }
+  .where { display: grid; gap: var(--s-4); justify-items: start; }
+  .maps { color: var(--text); font-weight: 700; padding: 8px 0; }
+  @media (max-width: 700px) {
+    .heads, .heads tbody, .heads tr, .heads td { display: block; width: auto; }
+    .heads tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .heads td { border: 0 !important; padding: 2px 0; }
+  }
+</style>

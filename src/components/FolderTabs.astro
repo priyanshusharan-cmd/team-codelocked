@@ -1,0 +1,126 @@
+---
+// Folder tabs = the site navigation. Plain labels; the theme is in the styling.
+interface Props { current?: string }
+const { current = '' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const links: { label: string; href: string; external?: boolean }[] = [
+  { label: 'About', href: '/#about' },
+  { label: 'Events', href: '/events' },
+  { label: 'Team', href: '/team' },
+  { label: 'BitByBit', href: 'https://bitbybit-9h8e.vercel.app/', external: true },
+  { label: 'Join', href: '/join' },
+  { label: 'Contact', href: '/contact' },
+];
+---
+<header class="tabs-bar">
+  <a class="brand" href={`${base}/`} aria-label="TeamCodeLocked home"><img class="logo" src={`${base}/brand/logo-hex.webp`} alt="" width="34" height="32" />TCLD&nbsp;/</a>
+  <nav aria-label="Main">
+    <ul class="tabs">
+      {links.map((l) => (
+        <li>
+          <a class:list={['tab', { on: current === l.label }]} href={l.external ? l.href : `${base}${l.href}`}
+             target={l.external ? '_blank' : undefined} rel={l.external ? 'noopener' : undefined}
+             aria-current={current === l.label ? 'page' : undefined}>{l.label}{l.external && <span class="ext" aria-hidden="true"> ↗</span>}{l.external && <span class="sr-only"> (opens in a new tab)</span>}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <button class="menu-btn pressable" type="button" aria-expanded="false" aria-controls="menu-sheet">Menu</button>
+</header>
+
+<div id="menu-sheet" class="sheet" hidden>
+  <div class="sheet-inner">
+    <button class="sheet-close pressable" type="button" aria-label="Close menu">Close</button>
+    <ul>
+      {links.map((l) => (
+        <li><a href={l.external ? l.href : `${base}${l.href}`} target={l.external ? '_blank' : undefined} rel={l.external ? 'noopener' : undefined} aria-current={current === l.label ? 'page' : undefined}>{l.label}{l.external && ' ↗'}</a></li>
+      ))}
+    </ul>
+    <a class="sheet-join" href={`${base}/join`}>Join the club</a>
+  </div>
+</div>
+
+<style>
+  .tabs-bar { display: flex; align-items: flex-end; gap: var(--s-5); padding: 0 calc(var(--desk-margin) + 28px); height: 56px; }
+  .logo { width: 34px; height: 32px; object-fit: cover; clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); margin-right: 10px; }
+  .brand { display: inline-flex; align-items: center; color: var(--text); font: 800 1.125rem/1 var(--font-display); font-variation-settings: "wdth" 70; text-decoration: none; padding-bottom: 12px; letter-spacing: 0.01em; }
+  .tabs { display: flex; gap: 6px; list-style: none; padding: 0; }
+  .tab {
+    display: block; padding: 11px 22px 10px; border-radius: var(--r-tab) var(--r-tab) 0 0;
+    background: var(--folder-3); color: var(--text-soft); text-decoration: none;
+    font: 700 0.8125rem/1 var(--font-typed); letter-spacing: 0.06em; text-transform: uppercase;
+    transition: transform var(--dur-hover) var(--ease-out), background-color var(--dur-hover) var(--ease-out);
+  }
+  .tab.on { background: var(--folder); color: var(--text); }
+  @media (hover: hover) and (pointer: fine) {
+    .tab:not(.on):hover { transform: translateY(-4px); background: var(--folder-hover); color: var(--text); }
+  }
+  .tab:focus-visible { outline-offset: -4px; }
+  .menu-btn { display: none; }
+
+  /* Phone: brand + Menu button, full-screen navy sheet. */
+  @media (max-width: 860px) {
+    .tabs-bar { align-items: center; justify-content: space-between; padding: 0 var(--desk-margin); }
+    .brand { padding-bottom: 0; font-size: 1.25rem; }
+    nav { display: none; }
+    .menu-btn {
+      display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px;
+      background: var(--folder); color: var(--text); border: 1px solid var(--line); border-radius: var(--r-control);
+      font: 700 0.875rem/1 var(--font-typed); letter-spacing: 0.06em; text-transform: uppercase;
+    }
+  }
+  .sheet { position: fixed; inset: 0; z-index: 50; background: rgb(8 14 26 / 0.6); }
+  .sheet-inner {
+    position: absolute; inset: 0 0 auto 0; min-height: 100dvh; background: var(--desk);
+    padding: var(--s-5) var(--desk-margin) var(--s-8); display: flex; flex-direction: column; gap: var(--s-6);
+    transform: translateY(-100%); transition: transform var(--dur-sheet) var(--ease-drawer);
+  }
+  .sheet.open .sheet-inner { transform: none; }
+  .sheet ul { list-style: none; padding: 0; display: grid; gap: 2px; }
+  .sheet ul a {
+    display: block; padding: 14px 0; color: var(--on-desk); text-decoration: none; border-bottom: 1px solid var(--desk-line);
+    font: 900 2.5rem/1 var(--font-display); font-variation-settings: "wdth" 72; text-transform: uppercase;
+  }
+  .sheet ul a[aria-current='page'] { color: var(--teal); }
+  .sheet-close {
+    align-self: flex-end; min-height: 44px; padding: 0 18px; background: transparent; color: var(--on-desk);
+    border: 1px solid var(--desk-line); border-radius: var(--r-control); font: 700 0.875rem/1 var(--font-typed); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .sheet-join {
+    align-self: flex-start; background: var(--text); color: var(--desk); text-decoration: none;
+    padding: 18px 26px; border-radius: var(--r-control); font: 700 1.125rem/1 var(--font-text);
+  }
+  @media (prefers-reduced-motion: reduce) { .sheet-inner { transition: opacity 200ms ease; transform: none; opacity: 0; } .sheet.open .sheet-inner { opacity: 1; } }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-btn');
+  const sheet = document.getElementById('menu-sheet');
+  const close = sheet?.querySelector<HTMLButtonElement>('.sheet-close');
+  if (btn && sheet && close) {
+    const open = () => {
+      sheet.hidden = false;
+      requestAnimationFrame(() => sheet.classList.add('open'));
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      close.focus();
+    };
+    const shut = () => {
+      sheet.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      setTimeout(() => { sheet.hidden = true; btn.focus(); }, 240);
+    };
+    btn.addEventListener('click', open);
+    close.addEventListener('click', shut);
+    sheet.addEventListener('click', (e) => { if (e.target === sheet) shut(); });
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.hidden) shut(); });
+    sheet.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const f = sheet.querySelectorAll<HTMLElement>('a, button');
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+</script>

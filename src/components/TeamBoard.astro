@@ -1,0 +1,61 @@
+---
+// Faculty coordinator as the highlighted feature card + the heads in a 3×3 grid.
+// Home page (animated): every photo, the faculty card included, starts scattered (about a
+// quarter-screen away, tilted 9–14°) and settles into place as the section scrolls in;
+// the faculty card lands last. Scroll-driven CSS, transform only.
+// Team page / phones / reduced motion / no support → still grid.
+import PersonFile from './PersonFile.astro';
+import { heads, faculty, headTeam } from '../data/site';
+interface Props { emails?: boolean; animated?: boolean }
+const { emails = false, animated = false } = Astro.props;
+
+// gentle offsets: [x vw, y vh, rotation deg]
+const drift: [number, number, number][] = [
+  [-18, -14, -12], [4, 18, 10], [22, -10, 13],
+  [-24, 10, 11], [6, -16, -10], [26, 14, -13],
+  [-20, -8, -11], [2, 16, 12], [24, -12, 14],
+];
+const headStyle = (i: number) =>
+  `--sx:${drift[i][0]}vw;--sy:${drift[i][1]}vh;--sr:${drift[i][2]}deg;--ss:0.86;--land:${34 + i * 3}%`;
+---
+<div class:list={['board', { animated }]}>
+  <div class="fac cell" data-team="All" style={animated ? '--sx:16vw;--sy:8vh;--sr:-9deg;--ss:0.88;--land:62%' : undefined}>
+    <PersonFile name={faculty.name} role={faculty.role} photo={faculty.photo} size="lg" />
+  </div>
+  <div class="heads">
+    {heads.map((h, i) => (
+      <div class="cell piece" data-team={headTeam[h.role]} style={animated ? headStyle(i) : undefined}>
+        <PersonFile name={h.name} role={h.role} photo={h.photo} position={h.position} ratio="1 / 1" email={emails ? h.email : undefined} />
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .board { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 2fr); gap: var(--s-7); align-items: start; }
+  .heads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-7) var(--s-5); }
+  .cell[hidden] { display: none; }
+  @media (max-width: 860px) {
+    .board { grid-template-columns: 1fr; }
+    .fac { max-width: 320px; }
+  }
+  @media (max-width: 560px) {
+    .heads { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6) var(--s-4); }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (min-width: 861px) and (prefers-reduced-motion: no-preference) {
+      .animated { view-timeline: --team block; }
+      .animated .fac, .animated .piece {
+        animation: settle var(--ease-out) both;
+        animation-timeline: --team;
+        animation-range: entry 10% cover var(--land);
+        will-change: transform;
+      }
+      @keyframes settle {
+        from { transform: translate(var(--sx), var(--sy)) rotate(var(--sr)) scale(var(--ss)); }
+        to   { transform: none; }
+      }
+    }
+  }
+</style>

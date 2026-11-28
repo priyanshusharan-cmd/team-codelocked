@@ -1,0 +1,85 @@
+---
+// A typed contact sheet with perforated slips.
+// Links (Instagram, LinkedIn, BitByBit) are real links that open directly in a new tab.
+// Copy slips (email) copy to the clipboard and say so. Slips never disappear.
+interface Slip { label: string; value: string; href?: string }
+interface Props { title: string; note?: string; slips: Slip[] }
+const { title, note, slips } = Astro.props;
+---
+<div class="sheet-paper">
+  <img class="clip" src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/brand/paperclip.svg`} alt="" width="22" height="66" />
+  <h3>{title}</h3>
+  {note && <p>{note}</p>}
+  <ul class="slips" style={`--n:${slips.length}`}>
+    {slips.map((s) => (
+      <li>
+        {s.href ? (
+          <a class="slip" href={s.href} target="_blank" rel="noopener" aria-label={`${s.label} (opens in a new tab)`}>
+            <span>{s.label} ↗</span>
+          </a>
+        ) : (
+          <button type="button" class="slip" data-value={s.value} aria-label={`Copy ${s.label.toLowerCase()}: ${s.value}`}>
+            <span>{s.label}</span>
+          </button>
+        )}
+      </li>
+    ))}
+  </ul>
+  <p class="toast" role="status" aria-live="polite"></p>
+</div>
+
+<style>
+  .sheet-paper { --line: rgb(20 17 12 / 0.3); position: relative; background: var(--paper); color: var(--paper-ink); padding: 26px 24px 0; box-shadow: var(--shadow-raised); }
+  .clip { position: absolute; top: -20px; right: 36px; width: 22px; height: 66px; }
+  h3 { font: 900 2rem/0.95 var(--font-display); font-variation-settings: "wdth" 72; text-transform: uppercase; }
+  p { margin-top: 10px; font-size: 0.9375rem; color: var(--paper-ink-soft); max-width: 36ch; }
+  .slips {
+    list-style: none; padding: 0; margin: 22px -24px 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    border-top: 2px dashed var(--line);
+  }
+  .slips li + li { border-left: 2px dashed var(--line); }
+  .slip {
+    all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; width: 100%; height: 150px; cursor: pointer; background: var(--paper);
+    padding: 12px 0;
+    font: 700 0.8125rem/1 var(--font-typed); letter-spacing: 0.04em; color: var(--paper-ink);
+    transition: background-color var(--dur-hover) var(--ease-out), transform var(--dur-press) var(--ease-out);
+  }
+  .slip span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+  @media (hover: hover) and (pointer: fine) { .slip:hover { background: #fffaf0; } }
+  .slip:active { transform: translateY(3px); }
+  .slip:focus-visible { outline: 2px solid var(--teal-ink); outline-offset: -4px; }
+  .slip.done { background: #e4f3ee; }
+  .toast {
+    position: absolute; left: 50%; bottom: 14px; transform: translate(-50%, 6px); margin: 0; max-width: calc(100% - 24px);
+    background: var(--paper-ink); color: var(--paper); padding: 10px 14px; border-radius: var(--r-control); font: 600 0.875rem/1.2 var(--font-text);
+    opacity: 0; pointer-events: none; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (max-width: 520px) { .slip { height: 130px; font-size: 0.75rem; } }
+  @media (prefers-reduced-motion: reduce) { .slip:active { transform: none; } .toast { transition: opacity 200ms ease; transform: translate(-50%, 0); } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.sheet-paper').forEach((sheet) => {
+    const toast = sheet.querySelector<HTMLElement>('.toast');
+    let tt: number | undefined;
+    const say = (msg: string) => {
+      if (!toast) return;
+      toast.textContent = msg; toast.classList.add('show'); clearTimeout(tt);
+      tt = window.setTimeout(() => toast.classList.remove('show'), 2200);
+    };
+    sheet.querySelectorAll<HTMLButtonElement>('button.slip').forEach((b) => {
+      b.addEventListener('click', async () => {
+        const value = b.dataset.value || '';
+        try {
+          await navigator.clipboard.writeText(value);
+          say('Copied to clipboard');
+        } catch {
+          say(value);   // clipboard blocked: at least show it
+        }
+        b.classList.add('done');
+        setTimeout(() => b.classList.remove('done'), 1200);
+      });
+    });
+  });
+</script>

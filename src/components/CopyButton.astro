@@ -1,0 +1,48 @@
+---
+// Copies a value; icon morphs to a check, a live region announces it.
+interface Props { value: string; label?: string; tone?: 'manila' | 'desk' }
+const { value, label = 'Copy email', tone = 'manila' } = Astro.props;
+---
+<button type="button" class:list={['copy', tone]} data-copy={value} aria-label={`${label}: ${value}`}>
+  <span class="icons" aria-hidden="true">
+    <svg class="i-copy" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1.5"/><path d="M5 15V4.5A1.5 1.5 0 0 1 6.5 3H15"/></svg>
+    <svg class="i-check" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+  </span>
+  <span class="txt">Copy</span>
+  <span class="sr-only live" aria-live="polite"></span>
+</button>
+
+<style>
+  .copy {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px;
+    border: 1px solid var(--line); border-radius: var(--r-control); background: var(--paper); color: var(--paper-ink);
+    font: 700 0.75rem/1 var(--font-typed); letter-spacing: 0.06em; text-transform: uppercase;
+    transition: transform var(--dur-press) var(--ease-out), background-color var(--dur-hover) var(--ease-out);
+  }
+  .copy.desk { background: transparent; color: var(--on-desk); border-color: var(--desk-line); }
+  .copy:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) { .copy:hover { background: #fffaf0; } .copy.desk:hover { background: var(--desk-2); } }
+  .icons { position: relative; width: 18px; height: 18px; }
+  .icons svg { position: absolute; inset: 0; transition: opacity 150ms var(--ease-out), filter 150ms var(--ease-out), transform 150ms var(--ease-out); }
+  .i-check { opacity: 0; filter: blur(2px); transform: scale(0.9); }
+  .copy.done .i-copy { opacity: 0; filter: blur(2px); transform: scale(0.9); }
+  .copy.done .i-check { opacity: 1; filter: none; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .icons svg { transition: opacity 150ms ease; filter: none !important; transform: none !important; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.copy[data-copy]').forEach((b) => {
+    const live = b.querySelector('.live');
+    const txt = b.querySelector('.txt');
+    let t: number | undefined;
+    b.addEventListener('click', async () => {
+      const v = b.dataset.copy || '';
+      try { await navigator.clipboard.writeText(v); } catch { /* clipboard blocked: still show the value */ }
+      b.classList.add('done');
+      if (txt) txt.textContent = 'Copied';
+      if (live) live.textContent = `Copied ${v}`;
+      clearTimeout(t);
+      t = window.setTimeout(() => { b.classList.remove('done'); if (txt) txt.textContent = 'Copy'; if (live) live.textContent = ''; }, 2000);
+    });
+  });
+</script>

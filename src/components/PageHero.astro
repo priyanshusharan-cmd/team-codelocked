@@ -1,0 +1,31 @@
+---
+// Short page header inside the folder: big title, one line, optional right side.
+import Folder from './Folder.astro';
+interface Props { title: string; lede?: string; split?: boolean }
+const { title, lede, split = false } = Astro.props;
+---
+{split ? (
+  <Folder spread class="page-hero">
+    <div slot="left" class="ph-left">
+      <h1 class="ph-title enter" style="--t:120ms">{title}</h1>
+      {lede && <p class="ph-lede enter" style="--t:220ms;--d:10px">{lede}</p>}
+      <div class="enter" style="--t:300ms;--d:8px"><slot name="actions" /></div>
+    </div>
+    <div slot="right" class="ph-right enter" style="--t:200ms"><slot name="right" /></div>
+  </Folder>
+) : (
+  <Folder class="page-hero">
+    <div class="ph-left">
+      <h1 class="ph-title enter" style="--t:120ms">{title}</h1>
+      {lede && <p class="ph-lede enter" style="--t:220ms;--d:10px">{lede}</p>}
+      <div class="enter" style="--t:300ms;--d:8px"><slot name="actions" /></div>
+    </div>
+  </Folder>
+)}
+
+<style>
+  .ph-left { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: var(--s-4); }
+  .ph-title { font: 900 clamp(3rem, 8vw, 7rem)/0.86 var(--font-display); font-variation-settings: "wdth" var(--display-wdth); text-transform: uppercase; }
+  .ph-lede { font-size: var(--t-body-l); line-height: 1.5; color: var(--text-soft); max-width: 40ch; }
+  .ph-right { display: grid; align-content: center; height: 100%; }
+</style>

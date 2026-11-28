@@ -1,0 +1,133 @@
+---
+// Past events: an endless strip that drifts on its own (a loop, like a carousel going round).
+// You can also move it yourself — trackpad / wheel sideways scroll or drag — and it pauses while
+// you do, then carries on. It also pauses on hover and keyboard focus (no pause button, by request).
+// Reduced motion: no auto-drift; it's just a swipeable row.
+import CaseFolder from './CaseFolder.astro';
+import Button from './Button.astro';
+import { events, href } from '../data/site';
+interface Props { id?: string; showAll?: boolean }
+const { id = 'cases', showAll = true } = Astro.props;
+// enough copies to always fill wide screens while looping
+const copies = [0, 1, 2];
+---
+<section class="pe" id={id} aria-labelledby={`${id}-h`}>
+  <div class="pe-head">
+    <h2 class="h2 on-desk" id={`${id}-h`}>Past events</h2>
+    <div class="pe-actions">
+      {showAll && <Button variant="secondary" href={href('/events')} class="on-desk-link">All events</Button>}
+    </div>
+  </div>
+  <div class="pe-viewport" tabindex="0" aria-label="Past events, scroll sideways">
+    <div class="pe-track">
+      {copies.map((c) => events.map((e) => (
+        <div class="pe-item" id={c === 0 ? `case-${e.slug}` : undefined} aria-hidden={c === 0 ? undefined : 'true'} inert={c === 0 ? undefined : true}>
+          <CaseFolder no={e.no} dateLabel={e.dateLabel} title={e.title} href={href(`/events/${e.slug}`)} color={e.color}
+            poster={e.poster} status={e.status} slug={c === 0 ? e.slug : undefined}
+            facts={[{ label: 'Venue', value: e.venue }, { label: 'Team', value: e.team }, { label: 'Prize', value: e.prize }]} />
+        </div>
+      )))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pe-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--s-4); padding: 0 var(--desk-margin); margin-bottom: var(--s-6); }
+  .pe-actions { display: flex; align-items: center; gap: var(--s-5); }
+  :global(.on-desk-link) { color: var(--on-desk) !important; }
+
+  .pe-viewport {
+    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; cursor: grab;
+    -webkit-mask: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+            mask: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  }
+  .pe-viewport::-webkit-scrollbar { display: none; }
+  .pe-viewport.dragging { cursor: grabbing; user-select: none; }
+  .pe-viewport:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; }
+  .pe-track { display: flex; gap: 14px; padding: 6px var(--desk-margin) 10px; width: max-content; }
+  .pe-item { width: min(84vw, 440px); flex: none; --rest: 0px; }
+  .pe-item :global(.case) { height: 100%; border-radius: var(--r-folder); }
+  .dragging :global(a) { pointer-events: none; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.pe').forEach((sec) => {
+    const vp = sec.querySelector<HTMLElement>('.pe-viewport')!;
+    const track = sec.querySelector<HTMLElement>('.pe-track')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SPEED = 0.45;               // px per frame at 60fps ≈ 27 px/s — calm drift
+    let paused = reduce;              // reduced motion: no auto-drift
+    let userUntil = 0;                // pause auto-drift until this time (ms) after user input
+    let pos = 0;                      // sub-pixel position
+    let last = performance.now();
+    // only while the pointer is actually on a card (not the heading or the gaps)
+    let hovering = false;
+    track.addEventListener('pointerover', (e) => { if ((e.target as Element).closest('.pe-item')) hovering = true; });
+    track.addEventListener('pointerout', (e) => {
+      const to = (e as PointerEvent).relatedTarget as Element | null;
+      if (!to || !to.closest || !to.closest('.pe-item')) hovering = false;
+    });
+    vp.addEventListener('pointerleave', () => (hovering = false));
+
+    // width of one copy (items of copy 0) — wrap around when we pass it
+    const copyWidth = () => {
+      const items = track.children; const per = items.length / 3;
+      const first = items[0] as HTMLElement, nextCopy = items[per] as HTMLElement;
+      return nextCopy.offsetLeft - first.offsetLeft;
+    };
+    const wrap = () => {
+      const w = copyWidth();
+      if (vp.scrollLeft >= w) vp.scrollLeft -= w;
+      else if (vp.scrollLeft <= 0) vp.scrollLeft += w;
+    };
+    // start one copy in, so you can also scroll left straight away
+    requestAnimationFrame(() => { vp.scrollLeft = copyWidth(); pos = vp.scrollLeft; });
+
+    const tick = (now: number) => {
+      const dt = Math.min(64, now - last); last = now;
+      const visible = vp.getBoundingClientRect().bottom > 0 && vp.getBoundingClientRect().top < innerHeight;
+      if (!paused && !hovering && !vp.contains(document.activeElement) && now > userUntil && visible && !document.hidden) {
+        pos += SPEED * (dt / 16.67);
+        vp.scrollLeft = pos;
+        wrap(); pos = vp.scrollLeft + (pos % 1);
+      } else {
+        pos = vp.scrollLeft;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    const hold = (ms = 2200) => { userUntil = performance.now() + ms; };
+    vp.addEventListener('wheel', (e) => {
+      // vertical wheel over the strip keeps scrolling the page; sideways (trackpad / shift) moves the strip
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) hold();
+    }, { passive: true });
+    vp.addEventListener('scroll', () => { if (performance.now() < userUntil) wrap(); }, { passive: true });
+    vp.addEventListener('touchstart', () => hold(3000), { passive: true });
+    vp.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault(); hold();
+        vp.scrollBy({ left: (e.key === 'ArrowRight' ? 1 : -1) * 454, behavior: reduce ? 'auto' : 'smooth' });
+      }
+    });
+
+    // mouse drag to move it
+    let dragX = 0, startLeft = 0, moved = false, down = false;
+    vp.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      down = true; moved = false; dragX = e.clientX; startLeft = vp.scrollLeft; hold(60000);
+    });
+    addEventListener('pointermove', (e) => {
+      if (!down) return;
+      const dx = e.clientX - dragX;
+      if (Math.abs(dx) > 4) { moved = true; vp.classList.add('dragging'); }
+      vp.scrollLeft = startLeft - dx; wrap(); startLeft = vp.scrollLeft + dx;
+    });
+    addEventListener('pointerup', () => {
+      if (!down) return; down = false; hold();
+      setTimeout(() => vp.classList.remove('dragging'), 0);
+    });
+    vp.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+
+  });
+</script>

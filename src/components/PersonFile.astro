@@ -1,0 +1,27 @@
+---
+import Exhibit from './Exhibit.astro';
+// Personnel file: paperclipped 4:5 portrait, typed role label, name, optional email.
+interface Props { name: string; role: string; photo?: string; email?: string; position?: string; ratio?: string; size?: 'md' | 'lg' }
+const { name, role, photo, email, position = 'center 25%', ratio = '4 / 5', size = 'md' } = Astro.props;
+const initials = name.replace(/^Dr\.?\s*/i, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+---
+<article class:list={['person', size]}>
+  <Exhibit src={photo} alt={name} ratio={ratio} initials={initials} position={position} compact={size !== 'lg'} />
+  <div class="meta">
+    <span class="role">{role}</span>
+    <h3 class="name">{name}</h3>
+    {email && (
+      <a class="mail" href={`mailto:${email}`}>{email}</a>
+    )}
+  </div>
+</article>
+
+<style>
+  .person { display: grid; gap: 26px; align-content: start; min-width: 0; }
+  .meta { display: grid; gap: 6px; min-width: 0; }
+  .role { justify-self: start; background: var(--paper); color: var(--paper-ink); border: 1px solid var(--line); padding: 5px 8px 4px; font: 700 0.75rem/1.2 var(--font-typed); letter-spacing: 0.06em; text-transform: uppercase; }
+  .name { font: 900 1.625rem/0.95 var(--font-display); font-variation-settings: "wdth" 70; text-transform: uppercase; overflow-wrap: anywhere; }
+  .lg .name { font-size: clamp(1.75rem, 2.6vw, 2.5rem); }
+  .mail { justify-self: start; margin-top: 4px; color: var(--teal); font-size: 0.875rem; overflow-wrap: anywhere; min-width: 0; text-decoration-color: rgb(79 209 219 / 0.4); }
+  @media (hover: hover) and (pointer: fine) { .mail:hover { text-decoration-color: currentColor; } }
+</style>

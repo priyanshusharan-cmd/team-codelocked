@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FolderTabs from '../components/FolderTabs.astro';
+import Folder from '../components/Folder.astro';
+import Button from '../components/Button.astro';
+import Footer from '../components/Footer.astro';
+import { href } from '../data/site';
+---
+<BaseLayout title="Page not found" noindex>
+  <FolderTabs />
+  <main id="main" class="page-main">
+    <Folder label="Locked">
+      <div class="lock">
+        <p class="typed muted">Error 404</p>
+        <h1 class="t">This case is <span class="locked" id="word">locked</span>.</h1>
+        <p class="lede">The page isn’t here. Crack the code for fun, or just head back.</p>
+        <form class="code" id="code" autocomplete="off">
+          <label class="typed muted" for="pin">Hint: the first and last Utsav 2026 dates</label>
+          <div class="row">
+            <input id="pin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="····" aria-describedby="msg" />
+            <button type="submit" class="try pressable">Try</button>
+          </div>
+          <p id="msg" class="msg" role="status" aria-live="polite"></p>
+        </form>
+        <div class="links"><Button href={href('/')}>Back home</Button><Button variant="secondary" href={href('/events')}>See events</Button></div>
+      </div>
+    </Folder>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .lock { display: grid; gap: var(--s-5); justify-items: start; padding: var(--s-6) 0; }
+  .t { font: 900 clamp(2.75rem, 7vw, 6rem)/0.9 var(--font-display); font-variation-settings: "wdth" 72; text-transform: uppercase; }
+  .locked { position: relative; display: inline-block; }
+  .locked::after { content: ""; position: absolute; inset: 0.08em -0.04em 0.06em; background: var(--redact); transform-origin: right; transition: transform 420ms var(--ease-in-out); }
+  .open .locked::after { transform: scaleX(0); }
+  .code { display: grid; gap: var(--s-3); }
+  .row { display: flex; gap: var(--s-3); }
+  input { width: 9ch; min-height: 52px; padding: 0 14px; background: var(--paper); color: var(--paper-ink); border: 0; border-radius: var(--r-control);
+          font: 700 1.5rem/1 var(--font-typed); letter-spacing: 0.3em; font-size: max(16px, 1.5rem); }
+  input:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+  .try { min-height: 52px; padding: 0 22px; border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: var(--r-control); font: 700 1rem/1 var(--font-typed); text-transform: uppercase; letter-spacing: 0.06em; }
+  .msg { min-height: 1.4em; color: var(--text-soft); }
+  .shake { animation: shake 320ms var(--ease-out); }
+  @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  .links { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-6); align-items: center; margin-top: var(--s-4); }
+  @media (prefers-reduced-motion: reduce) { .shake { animation: none; } .locked::after { transition: opacity 200ms ease; } .open .locked::after { transform: none; opacity: 0; } }
+</style>
+
+<script>
+  const form = document.getElementById('code') as HTMLFormElement;
+  const pin = document.getElementById('pin') as HTMLInputElement;
+  const msg = document.getElementById('msg')!;
+  const word = document.getElementById('word')!;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (pin.value === '1719') {
+      word.textContent = 'open';
+      document.querySelector('.lock')?.classList.add('open');
+      msg.textContent = 'Solved. 17 and 19 April. Now go see what else we run.';
+    } else {
+      msg.textContent = 'Not quite. Think of the dates.';
+      pin.classList.remove('shake'); void pin.offsetWidth; pin.classList.add('shake');
+    }
+  });
+</script>

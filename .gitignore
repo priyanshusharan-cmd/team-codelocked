@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.env
+.env.*
+.claude/
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/review/
+.impeccable/config.local.json
+.taste-skill/
+
+# full-size originals (site uses the .webp copies)
+public/images/events/*.png
+public/images/events/*.jpeg

@@ -1,0 +1,56 @@
+---
+// Segmented control with a sliding indicator (year switch, filters).
+// Emits a `segment-change` event with detail { name, value }.
+interface Props { name: string; label: string; options: string[]; value?: string; tone?: 'manila' | 'desk' }
+const { name, label, options, value = options[0], tone = 'manila' } = Astro.props;
+---
+<div class:list={['seg', tone]} role="radiogroup" aria-label={label} data-name={name}>
+  <span class="ind" aria-hidden="true"></span>
+  {options.map((o) => (
+    <button type="button" role="radio" aria-checked={o === value ? 'true' : 'false'} tabindex={o === value ? 0 : -1} data-value={o}>{o}</button>
+  ))}
+</div>
+
+<style>
+  .seg { position: relative; display: inline-flex; padding: 4px; gap: 2px; background: var(--folder-3); border-radius: var(--r-control); max-width: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .seg.desk { background: var(--desk-2); }
+  .ind { position: absolute; top: 4px; bottom: 4px; left: 0; width: 1px; background: var(--text); transform-origin: left center;
+         transition: transform var(--dur-ui) var(--ease-out); }
+  .desk .ind { background: var(--teal); }
+  button {
+    position: relative; z-index: 1; border: 0; background: none; min-height: 40px; padding: 0 14px; white-space: nowrap;
+    font: 700 0.8125rem/1 var(--font-typed); letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-soft);
+    transition: color var(--dur-ui) var(--ease-out);
+  }
+  .desk button { color: var(--on-desk); }
+  button[aria-checked='true'] { color: var(--desk); }
+  .desk button[aria-checked='true'] { color: var(--text); }
+  button:focus-visible { outline-offset: -2px; }
+  @media (prefers-reduced-motion: reduce) { .ind { transition: none; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.seg').forEach((seg) => {
+    const ind = seg.querySelector<HTMLElement>('.ind')!;
+    const btns = [...seg.querySelectorAll<HTMLButtonElement>('button')];
+    const place = (b: HTMLButtonElement) => {
+      ind.style.transform = `translateX(${b.offsetLeft}px) scaleX(${b.offsetWidth})`;
+    };
+    const select = (b: HTMLButtonElement, focus = false) => {
+      btns.forEach((x) => { const on = x === b; x.setAttribute('aria-checked', String(on)); x.tabIndex = on ? 0 : -1; });
+      place(b); if (focus) b.focus();
+      seg.dispatchEvent(new CustomEvent('segment-change', { bubbles: true, detail: { name: seg.dataset.name, value: b.dataset.value } }));
+    };
+    const current = () => btns.find((b) => b.getAttribute('aria-checked') === 'true') || btns[0];
+    // first placement without animation
+    ind.style.transition = 'none'; place(current()); requestAnimationFrame(() => (ind.style.transition = ''));
+    btns.forEach((b) => b.addEventListener('click', () => select(b)));
+    seg.addEventListener('keydown', (e) => {
+      const i = btns.indexOf(current());
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select(btns[(i + 1) % btns.length], true); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select(btns[(i - 1 + btns.length) % btns.length], true); }
+    });
+    addEventListener('resize', () => place(current()));
+    document.fonts?.ready.then(() => place(current()));
+  });
+</script>

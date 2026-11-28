@@ -1,0 +1,59 @@
+---
+// Primary = ink stamp-button. Secondary = text link with a drawn underline and arrow.
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'on-desk';
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+  loading?: boolean;
+  external?: boolean;
+  class?: string;
+}
+const { href, variant = 'primary', type = 'button', disabled = false, loading = false, external = false, class: cls } = Astro.props;
+const Tag = href && !disabled ? 'a' : 'button';
+const ext = external ? { target: '_blank', rel: 'noopener' } : {};
+---
+<Tag
+  class:list={['btn', variant, { loading }, cls]}
+  href={Tag === 'a' ? href : undefined}
+  type={Tag === 'button' ? type : undefined}
+  disabled={Tag === 'button' ? disabled || loading : undefined}
+  aria-busy={loading ? 'true' : undefined}
+  {...ext}
+>
+  <span class="label"><slot /></span>{variant === 'secondary' && <span class="arrow" aria-hidden="true">→</span>}
+  {external && <span class="sr-only"> (opens in a new tab)</span>}
+</Tag>
+
+<style>
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; text-decoration: none; border: 0; cursor: pointer; white-space: nowrap;
+    font: 700 1.125rem/1 var(--font-text);
+  }
+  .primary, .on-desk {
+    min-height: 52px; padding: 0 28px; border-radius: var(--r-control);
+    background: var(--text); color: var(--desk);
+    transition: transform var(--dur-press) var(--ease-out), background-color var(--dur-hover) var(--ease-out);
+  }
+  .on-desk { background: var(--teal); color: var(--desk); }
+  .primary:active, .on-desk:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .primary:hover { background: #ffffff; }
+    .on-desk:hover { background: #7fe0e7; }
+    .secondary:hover .arrow { transform: translateX(4px); }
+  }
+  .secondary {
+    min-height: 44px; padding: 0 2px; background: none; color: var(--text);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat; background-position: left calc(100% - 8px); background-size: 100% 3px;
+  }
+  .arrow { display: inline-block; transition: transform var(--dur-hover) var(--ease-out); }
+  .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .loading .label { opacity: 0.55; }
+  .loading::after {
+    content: ""; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent;
+    animation: spin 700ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) { .loading::after { animation-duration: 2s; } }
+</style>

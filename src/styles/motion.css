@@ -1,0 +1,66 @@
+/* Motion system — WEBSITE_PROMPT.md §6.
+   Rules: ease-out for enters, never ease-in, never scale(0), only
+   transform/opacity/clip-path/filter, transitions for interactive state,
+   hover only on fine pointers, reduced motion = fades only. */
+
+@layer utilities {
+  /* One-shot entrance: add .enter + --t (delay) and optional --d (distance). */
+  @keyframes enter-rise {
+    from { opacity: 0; transform: translateY(var(--d, 14px)); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes enter-drop {
+    from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes enter-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .enter {
+    animation: enter-rise var(--dur, var(--dur-hero)) var(--ease-out) both;
+    animation-delay: var(--t, 0ms);
+  }
+  .enter-drop {
+    animation: enter-drop 620ms var(--ease-out) both;
+    animation-delay: var(--t, 0ms);
+  }
+  /* The home hero opens once per session; inner page headers enter on every visit (short, 600ms max). */
+  html[data-entered] .hero .enter,
+  html[data-entered] .hero .enter-drop { animation: none; }
+
+  /* Press feedback for anything tappable that opts in. */
+  .pressable { transition: transform var(--dur-press) var(--ease-out); }
+  .pressable:active { transform: scale(0.97); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .enter, .enter-drop { animation: enter-fade 200ms ease both !important; animation-delay: 0ms !important; }
+    .pressable:active { transform: none; }
+    *, *::before, *::after { scroll-behavior: auto !important; }
+  }
+}
+
+/* Cross-document view transitions (poster → event page). Progressive. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 200ms; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+/* Scatter → place (user request): photos start scattered across the screen and
+   settle into the grid as the section scrolls in. Scroll-driven, transform only.
+   Container sets the timeline; each item sets --sx/--sy/--sr. No support / reduced
+   motion → the grid simply renders in place. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scatter { view-timeline: --scatter block; }
+    .scatter .scatter-item {
+      animation: scatter-settle var(--ease-out) both;
+      animation-timeline: --scatter;
+      animation-range: entry 0% cover var(--land, 50%);
+      will-change: transform;
+    }
+    @keyframes scatter-settle {
+      from { transform: translate(var(--sx, 0), var(--sy, 0)) rotate(var(--sr, 0deg)) scale(0.82); }
+      to   { transform: none; }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="inner">
+    <div class="who">
+      <p class="name">TeamCodeLocked</p>
+      <p>The tech club of B.M.S. College of Engineering, Bengaluru.</p>
+    </div>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href={`${base}/events`}>Events</a></li>
+        <li><a href={`${base}/team`}>Team</a></li>
+        <li><a href="https://bitbybit-9h8e.vercel.app/" target="_blank" rel="noopener">BitByBit ↗</a></li>
+        <li><a href={`${base}/join`}>Join</a></li>
+        <li><a href={`${base}/contact`}>Contact</a></li>
+      </ul>
+      <ul>
+        <li><a href="mailto:teamcodelocked@gmail.com">teamcodelocked@gmail.com</a></li>
+        <li><a href="https://www.instagram.com/teamcodelocked/" target="_blank" rel="noopener">Instagram</a></li>
+        <li><a href="https://www.linkedin.com/company/teamcodelocked/" target="_blank" rel="noopener">LinkedIn</a></li>
+      </ul>
+    </nav>
+    <p class="fine num">© {year} TeamCodeLocked · BMSCE, Basavanagudi, Bengaluru</p>
+  </div>
+</footer>
+
+<style>
+  .footer { color: var(--on-desk); padding: var(--s-8) var(--desk-margin) var(--s-6); }
+  .inner { max-width: var(--content-max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-6) var(--s-8); align-items: start; }
+  .name { font: 900 2rem/1 var(--font-display); font-variation-settings: "wdth" 72; text-transform: uppercase; color: var(--text); margin-bottom: var(--s-3); }
+  .who p:not(.name) { color: var(--on-desk-soft); max-width: 36ch; }
+  nav { display: grid; grid-template-columns: auto auto; gap: var(--s-8); }
+  ul { list-style: none; padding: 0; display: grid; gap: 2px; align-content: start; }
+  a { color: var(--on-desk); text-decoration: none; white-space: nowrap; display: inline-block; padding: 5px 0;
+      background: linear-gradient(var(--teal), var(--teal)) left 90% / 0 1px no-repeat; transition: background-size var(--dur-small) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { a:hover { background-size: 100% 1px; } }
+  .fine { grid-column: 1 / -1; border-top: 1px solid var(--desk-line); padding-top: var(--s-4); margin-top: var(--s-2); color: var(--on-desk-soft); font: 700 0.75rem/1.4 var(--font-typed); letter-spacing: 0.05em; text-transform: uppercase; }
+  @media (max-width: 760px) { .inner { grid-template-columns: 1fr; } nav { gap: var(--s-6); } }
+  @media (max-width: 480px) { nav { grid-template-columns: 1fr; gap: var(--s-4); } a { white-space: normal; overflow-wrap: anywhere; } }
+</style>

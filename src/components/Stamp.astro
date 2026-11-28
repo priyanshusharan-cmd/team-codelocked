@@ -1,0 +1,18 @@
+---
+// Status only: OPEN, REGISTRATIONS OPEN, FULL, SOLVED, ARCHIVED, CLOSED. Never rotated.
+interface Props { tone?: 'stamp' | 'current' | 'ink' | 'paper'; size?: 'sm' | 'md' }
+const { tone = 'stamp', size = 'md' } = Astro.props;
+---
+<span class:list={['stamp', `tone-${tone}`, size]}><slot /></span>
+
+<style>
+  .stamp {
+    display: inline-flex; align-items: center; border: 3px solid; padding: 7px 10px 6px;
+    font: 700 0.9375rem/1 var(--font-typed); letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .sm { border-width: 2px; padding: 5px 7px 4px; font-size: 0.75rem; }
+  .tone-stamp { color: var(--stamp); }
+  .tone-current { color: currentColor; }
+  .tone-ink { color: var(--text); }
+  .tone-paper { color: var(--stamp-on-paper); }
+</style>

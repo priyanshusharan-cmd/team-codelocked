@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FolderTabs from '../components/FolderTabs.astro';
+import PageHero from '../components/PageHero.astro';
+import Folder from '../components/Folder.astro';
+import PersonFile from '../components/PersonFile.astro';
+import Segmented from '../components/Segmented.astro';
+import TeamBoard from '../components/TeamBoard.astro';
+import Footer from '../components/Footer.astro';
+import { archive2526, clubCoordinators2526, teamFilters } from '../data/site';
+const committees = ['Core', 'Organising', 'Volunteering'] as const;
+---
+<BaseLayout title="Team" description="The people behind TeamCodeLocked, BMSCE's tech club.">
+  <FolderTabs current="Team" />
+  <main id="main" class="page-main">
+    <PageHero title="The team" lede="The people who run TeamCodeLocked, guided by our faculty coordinator." />
+
+
+    <Folder label="Committee">
+      <div class="controls">
+        <Segmented name="year" label="Committee year" options={['2026–27', '2025–26']} />
+        <Segmented name="team" label="Filter by team" options={teamFilters} />
+      </div>
+
+      <!-- 2026–27 -->
+      <div class="year" data-year="2026–27">
+        <h2 class="h2 yh">2026–27</h2>
+        <TeamBoard emails />
+        <div class="empty-card soon">
+          <strong>Organising &amp; volunteering crews</strong>
+          <span>The 2026–27 lineup goes up here soon.</span>
+        </div>
+      </div>
+
+      <!-- 2025–26 archive -->
+      <div class="year" data-year="2025–26" hidden>
+        <h2 class="h2 yh">2025–26</h2>
+        <p class="coords typed">Club coordinators: {clubCoordinators2526.join(' · ')}</p>
+        {committees.map((c) => (
+          <section class="committee" aria-label={`${c} committee`}>
+            <h3 class="h3 ch">{c} committee</h3>
+            <div class="grid small" data-flip>
+              {archive2526.filter((p) => p.committee === c).map((p, i) => (
+                <div class="cell" data-team={p.team}>
+                  <PersonFile name={p.name} role={p.team} photo={p.photo} />
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+      <p class="none muted" hidden>No one in this team for this year yet.</p>
+    </Folder>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .controls { display: flex; flex-wrap: wrap; gap: var(--s-4); margin-bottom: var(--s-7); }
+  .yh { margin-bottom: var(--s-6); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--s-8) var(--s-5); }
+  .grid.small { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--s-7) var(--s-4); }
+  .cell[hidden] { display: none; }
+  .soon { margin-top: var(--s-8); }
+  .coords { color: var(--text-soft); margin: calc(-1 * var(--s-4)) 0 var(--s-6); }
+  .committee + .committee { margin-top: var(--s-8); }
+  .ch { margin-bottom: var(--s-6); color: var(--text-soft); }
+  .committee[hidden] { display: none; }
+  .none { margin-top: var(--s-5); }
+  @media (max-width: 560px) {
+    .grid, .grid.small { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6) var(--s-4); }
+  }
+</style>
+
+<script>
+  // Relaxed filter motion (user request):
+  //  1. cards that don't match slide out to the right, off the screen;
+  //  2. cards that stay glide to their new spot;
+  //  3. cards coming back slide in from the right (where they left);
+  //     cards appearing for the first time (e.g. after a year switch) rise from the bottom.
+  // Interrupting mid-way finishes the current step instantly and starts the new one.
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const OUT = 'cubic-bezier(0.77, 0, 0.175, 1)';   // moving on screen / leaving
+  const IN = 'cubic-bezier(0.23, 1, 0.32, 1)';     // arriving
+  const state = { year: '2026–27', team: 'All' };
+  const years = [...document.querySelectorAll<HTMLElement>('.year')];
+  const none = document.querySelector<HTMLElement>('.none');
+  const wentRight = new WeakSet<HTMLElement>();     // cards that left to the right
+  let running: Animation[] = [];
+  let token = 0;
+
+  const matches = (c: HTMLElement) => state.team === 'All' || c.dataset.team === state.team || c.dataset.team === 'All';
+  const visibleCells = () => [...document.querySelectorAll<HTMLElement>('.year:not([hidden]) .cell:not([hidden])')];
+  const onScreen = (r: DOMRect) => r.bottom > 0 && r.top < innerHeight;
+
+  function layout() {
+    years.forEach((y) => (y.hidden = y.dataset.year !== state.year));
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>('.year:not([hidden]) .cell').forEach((c) => { c.hidden = !matches(c); if (!c.hidden) shown++; });
+    document.querySelectorAll<HTMLElement>('.year:not([hidden]) .committee').forEach((sec) => { sec.hidden = !sec.querySelector('.cell:not([hidden])'); });
+    if (none) none.hidden = shown > 0;
+  }
+
+  async function apply(yearChanged: boolean) {
+    const my = ++token;
+    running.forEach((a) => a.finish()); running = [];
+    if (reduce) { layout(); return; }
+
+    const before = visibleCells();
+    const rects = new Map(before.map((c) => [c, c.getBoundingClientRect()]));
+    const leaving = yearChanged ? before : before.filter((c) => !matches(c));
+
+    // 1 · leaving cards slide out to the right (only the ones you can see actually animate)
+    const exits = leaving.filter((c) => onScreen(rects.get(c)!)).map((c, i) =>
+      c.animate(
+        [{ transform: 'none', opacity: 1 }, { transform: `translateX(${innerWidth - rects.get(c)!.left + 40}px)`, opacity: 0 }],
+        { duration: 480, delay: i * 30, easing: OUT, fill: 'forwards' },
+      ));
+    running = exits;
+    if (exits.length) await new Promise((r) => setTimeout(r, 480 + (exits.length - 1) * 30));
+    if (my !== token) return;
+    leaving.forEach((c) => { wentRight.add(c); });
+    exits.forEach((a) => a.cancel());
+
+    // 2 · swap the layout
+    const stayed = new Map([...rects].filter(([c]) => !leaving.includes(c)));
+    layout();
+
+    // 3 · stayers glide, newcomers arrive
+    const after = visibleCells();
+    let k = 0;
+    running = after.map((c) => {
+      const b = c.getBoundingClientRect();
+      const a = stayed.get(c);
+      if (a) {
+        const dx = a.left - b.left, dy = a.top - b.top;
+        if (!dx && !dy) return null;
+        return c.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 560, easing: OUT });
+      }
+      if (!onScreen(b)) return null;
+      const fromRight = wentRight.has(c) && !yearChanged;
+      wentRight.delete(c);
+      const from = fromRight ? `translateX(${innerWidth - b.left + 40}px)` : 'translateY(80px)';
+      return c.animate([{ transform: from, opacity: 0 }, { transform: 'none', opacity: 1 }],
+        { duration: 600, delay: Math.min(k++, 8) * 45, easing: IN, fill: 'backwards' });
+    }).filter(Boolean) as Animation[];
+  }
+
+  document.addEventListener('segment-change', (e) => {
+    const { name, value } = (e as CustomEvent).detail;
+    if (name === 'year') state.year = value;
+    if (name === 'team') state.team = value;
+    apply(name === 'year');
+  });
+</script>

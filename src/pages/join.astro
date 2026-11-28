@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FolderTabs from '../components/FolderTabs.astro';
+import PageHero from '../components/PageHero.astro';
+import Folder from '../components/Folder.astro';
+import Button from '../components/Button.astro';
+import Stamp from '../components/Stamp.astro';
+import TearOffSlips from '../components/TearOffSlips.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+const crews = [
+  ['Tech', 'Build the club’s tools, BitByBit included.'],
+  ['Design', 'Posters, brand and everything people see.'],
+  ['Event Management', 'Plan and run the events.'],
+  ['Marketing', 'Get people through the door.'],
+  ['Sponsorship & Social Media', 'Partners, Instagram and LinkedIn.'],
+];
+---
+<BaseLayout title="Join" description="Join TeamCodeLocked: Tech, Design, Event Management, Marketing, and Sponsorship & Social Media.">
+  <FolderTabs current="Join" />
+  <main id="main" class="page-main">
+    <PageHero title="Join a crew" lede="Recruitment opens at the start of each academic year.">
+      <div slot="actions" class="status">
+        {site.registrationsOpen
+          ? <Button href="#apply">Apply now</Button>
+          : <><Stamp>Applications closed</Stamp><Button variant="secondary" href={site.instagram} external>Follow for updates</Button></>}
+      </div>
+    </PageHero>
+
+    <Folder label="Crews">
+      <h2 class="h2">Five crews</h2>
+      <ol class="crews">
+        {crews.map(([t, d], i) => (
+          <li><span class="n num">{String(i + 1).padStart(2, '0')}</span><h3 class="h3">{t}</h3><p class="muted">{d}</p></li>
+        ))}
+      </ol>
+    </Folder>
+
+    <Folder spread label="Get in touch">
+      <div slot="left" class="ask">
+        <h2 class="h2">Questions?</h2>
+        <p class="lede">Ask us before applications open.</p>
+      </div>
+      <div slot="right">
+        <TearOffSlips title="Take a slip" note="Tap one to copy or open it." slips={[
+          { label: 'Email', value: site.email },
+          { label: 'Instagram', value: '@teamcodelocked', href: site.instagram },
+          { label: 'LinkedIn', value: 'TeamCodeLocked', href: site.linkedin },
+        ]} />
+      </div>
+    </Folder>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-5); }
+  .crews { list-style: none; padding: 0; margin-top: var(--s-7); border-top: 1px solid var(--line); }
+  .crews li { display: grid; grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-5); align-items: baseline; padding: var(--s-5) 0; border-bottom: 1px solid var(--line); }
+  .n { font: 700 0.875rem/1 var(--font-typed); color: var(--teal); letter-spacing: 0.08em; }
+  .ask { display: grid; gap: var(--s-4); align-content: center; height: 100%; }
+  @media (max-width: 700px) { .crews li { grid-template-columns: 40px minmax(0, 1fr); } .crews li p { grid-column: 2; } }
+</style>

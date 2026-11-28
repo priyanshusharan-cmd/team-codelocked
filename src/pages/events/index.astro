@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FolderTabs from '../../components/FolderTabs.astro';
+import PageHero from '../../components/PageHero.astro';
+import Folder from '../../components/Folder.astro';
+import PastEvents from '../../components/PastEvents.astro';
+import Button from '../../components/Button.astro';
+import Footer from '../../components/Footer.astro';
+import { site } from '../../data/site';
+---
+<BaseLayout title="Events" description="TeamCodeLocked events at BMSCE: The Last Block, Mind Snap and The Challenge Room at Utsav 2026.">
+  <FolderTabs current="Events" />
+  <main id="main" class="page-main">
+    <PageHero title="Events" lede="Puzzle rooms, mysteries and contests we run at BMSCE." />
+
+    <Folder label="Upcoming">
+      <h2 class="h2">Upcoming</h2>
+      <div class="empty-card" style="margin-top: var(--s-6)">
+        <strong>Nothing on the board yet</strong>
+        <span>The next event lands on Instagram first.</span>
+        <Button variant="secondary" href={site.instagram} external>Follow @teamcodelocked</Button>
+      </div>
+    </Folder>
+
+    <PastEvents id="past" showAll={false} />
+  </main>
+  <Footer />
+</BaseLayout>
+

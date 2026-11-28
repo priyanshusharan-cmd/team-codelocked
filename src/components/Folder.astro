@@ -1,0 +1,38 @@
+---
+// The manila folder that holds a page's content. `spread` splits it into two pages.
+interface Props { spread?: boolean; id?: string; class?: string; label?: string }
+const { spread = false, id, class: cls, label } = Astro.props;
+---
+<section id={id} class:list={['folder', { spread }, cls]} aria-label={label}>
+  {spread ? (
+    <>
+      <div class="page left"><slot name="left" /></div>
+      <div class="page right"><slot name="right" /></div>
+    </>
+  ) : (
+    <div class="page"><slot /></div>
+  )}
+</section>
+
+<style>
+  .folder {
+    position: relative; margin: 0 var(--desk-margin); border-radius: 0 var(--r-folder) var(--r-folder) var(--r-folder);
+    overflow: hidden; box-shadow: var(--shadow-folder);
+  }
+  .page { position: relative; background: var(--folder); color: var(--text); padding: clamp(28px, 4.5vw, 64px); }
+  .page::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.08; mix-blend-mode: soft-light;
+    background-image: var(--grain);
+  }
+  .page > :global(*) { position: relative; }
+  /* .spill lets children travel outside the folder (scatter animation) */
+  :global(.folder.spill) { overflow: visible; }
+  :global(.folder.spill) .page { border-radius: 0 var(--r-folder) var(--r-folder) var(--r-folder); }
+  .spread { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+  .spread .right { background: var(--folder-2); border-left: 2px solid var(--line); }
+  @media (max-width: 860px) {
+    .folder { border-radius: var(--r-folder); }
+    .spread { grid-template-columns: 1fr; }
+    .spread .right { border-left: 0; border-top: 2px solid var(--line); }
+  }
+</style>

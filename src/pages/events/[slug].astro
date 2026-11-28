@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FolderTabs from '../../components/FolderTabs.astro';
+import Folder from '../../components/Folder.astro';
+import Stamp from '../../components/Stamp.astro';
+import Button from '../../components/Button.astro';
+import Footer from '../../components/Footer.astro';
+import { events, site, href } from '../../data/site';
+
+export function getStaticPaths() {
+  return events.map((e, i) => ({ params: { slug: e.slug }, props: { e, prev: events[i - 1], next: events[i + 1] } }));
+}
+const { e, prev, next } = Astro.props;
+---
+<BaseLayout title={e.title} description={`${e.title}: ${e.about}`}>
+  <FolderTabs current="Events" />
+  <main id="main" class="page-main">
+    <section class="case-hero" style={`--case:${e.color}`} aria-labelledby="t">
+      <div class="info">
+        <a class="back typed" href={href('/events')}>← All events</a>
+        <span class="typed no">No. {e.no} · Utsav 2026</span>
+        <h1 id="t" class="title enter" style="--t:100ms">{e.title}</h1>
+        <p class="tagline enter" style="--t:200ms;--d:10px">{e.tagline}</p>
+        <dl class="facts num enter" style="--t:280ms;--d:8px">
+          <div><dt>Date</dt><dd>{e.date}</dd></div>
+          <div><dt>Venue</dt><dd>{e.venue}</dd></div>
+          <div><dt>Team</dt><dd>{e.team} members</dd></div>
+          <div><dt>Prize pool</dt><dd>{e.prize}</dd></div>
+        </dl>
+        <Stamp tone="current">{e.status}</Stamp>
+      </div>
+      <div class="poster-wrap">
+        <img class="poster" src={e.poster} alt={`${e.title} poster`} style={`view-transition-name:poster-${e.slug}`} />
+      </div>
+    </section>
+
+    <Folder label="Rounds">
+      <div class="rounds-head">
+        <h2 class="h2">The rounds</h2>
+        <p class="lede">{e.about}</p>
+      </div>
+      <ol class="rounds">
+        {e.rounds.map(([name, line], i) => (
+          <li>
+            <span class="step num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="h3">{name}</h3>
+            <p class="muted">{line}</p>
+          </li>
+        ))}
+      </ol>
+    </Folder>
+
+    <Folder label="Gallery">
+      <h2 class="h2">Gallery</h2>
+      <div class="empty-card" style="margin-top: var(--s-6)">
+        <strong>Photos coming soon</strong>
+        <span>Were you there? Send yours.</span>
+        <Button variant="secondary" href={`mailto:${site.email}?subject=${encodeURIComponent(e.title + ' photos')}`}>Email photos</Button>
+      </div>
+    </Folder>
+
+    <nav class="pager desk-sec" aria-label="More events">
+      {prev ? <a href={href(`/events/${prev.slug}`)} style={`--case:${prev.color}`}><span class="typed">Previous</span><b>{prev.title}</b></a> : <span></span>}
+      {next ? <a class="nx" href={href(`/events/${next.slug}`)} style={`--case:${next.color}`}><span class="typed">Next</span><b>{next.title}</b></a> : <span></span>}
+    </nav>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .case-hero {
+    margin: 0 var(--desk-margin); background: var(--case); color: #fff; border-radius: 0 var(--r-folder) var(--r-folder) var(--r-folder);
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-7); padding: clamp(24px, 4.5vw, 64px); box-shadow: var(--shadow-folder);
+  }
+  .info { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-4); }
+  .back { color: #fff; opacity: 0.85; text-decoration: none; padding: 8px 0; }
+  .back:hover { opacity: 1; }
+  .no { opacity: 0.85; }
+  .title { font: 900 clamp(3rem, 7vw, 6.5rem)/0.86 var(--font-display); font-variation-settings: "wdth" 70; text-transform: uppercase; }
+  .tagline { font-size: var(--t-body-l); opacity: 0.92; }
+  .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4) var(--s-6); margin: var(--s-4) 0; width: 100%; max-width: 460px; }
+  .facts dt { font: 700 0.75rem/1 var(--font-typed); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; }
+  .facts dd { margin: 0; font-weight: 600; }
+  .poster-wrap { display: grid; place-items: center; }
+  .poster { width: 100%; background: #fff; padding: 10px; box-shadow: var(--shadow-raised); }
+  .rounds-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-6); align-items: end; margin-bottom: var(--s-7); }
+  .rounds { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--s-5); counter-reset: none; }
+  .rounds li { border-top: 2px solid var(--text); padding-top: var(--s-4); display: grid; gap: var(--s-2); align-content: start; }
+  .step { font: 700 0.875rem/1 var(--font-typed); color: var(--teal); letter-spacing: 0.08em; }
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pager a { display: grid; gap: 6px; padding: var(--s-5); background: var(--case); color: #fff; text-decoration: none; border-radius: var(--r-folder);
+             transition: transform var(--dur-ui) var(--ease-out); }
+  .pager a.nx { text-align: right; justify-items: end; }
+  .pager b { font: 900 1.5rem/1 var(--font-display); font-variation-settings: "wdth" 70; text-transform: uppercase; }
+  @media (hover: hover) and (pointer: fine) { .pager a:hover { transform: translateY(-3px); } }
+  .pager a:active { transform: scale(0.985); }
+  @media (max-width: 860px) {
+    .case-hero, .rounds-head { grid-template-columns: 1fr; }
+    .case-hero { border-radius: var(--r-folder); }
+    .pager { grid-template-columns: 1fr; }
+  }
+</style>

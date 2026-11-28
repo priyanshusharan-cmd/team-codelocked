@@ -1,0 +1,54 @@
+---
+// A real photo filed as evidence: white border, paperclip, exhibit tag.
+// With no `src`, renders the "photo to come" placeholder with initials.
+interface Props {
+  src?: string;
+  alt: string;
+  tagTitle?: string;
+  tagLine?: string;
+  ratio?: string;        // e.g. "4 / 3", "4 / 5"
+  initials?: string;
+  position?: string;     // object-position
+  class?: string;
+  compact?: boolean;   // small exhibits (person cards): smaller tag
+  eager?: boolean;     // above the fold: load immediately
+}
+const { src, alt, tagTitle, tagLine, ratio = '4 / 3', initials, position = 'center', class: cls, compact = false, eager = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<figure class:list={['exhibit', { compact }, cls]} style={`--ratio:${ratio}`}>
+  <img class="clip" src={`${base}/brand/paperclip.svg`} alt="" width="22" height="66" />
+  <div class="frame">
+    {src ? (
+      <img class="photo" src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} decoding="async" style={`object-position:${position}`} />
+    ) : (
+      <div class="empty" role="img" aria-label={`${alt} (photo to come)`}><span>{initials}</span></div>
+    )}
+  </div>
+  {(tagTitle || !src) && (
+    <figcaption class="tag">
+      <b>{tagTitle ?? 'Photo to come'}</b>{tagLine && <span>{tagLine}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .exhibit { position: relative; background: #fff; padding: 12px; box-shadow: var(--shadow-raised); margin: 0; }
+  .clip { position: absolute; top: -20px; left: 40px; width: 22px; height: 66px; z-index: 2; }
+  .frame { overflow: hidden; aspect-ratio: var(--ratio); background: var(--paper); }
+  .photo { width: 100%; height: 100%; object-fit: cover; transition: transform 260ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .exhibit:hover .photo { transform: scale(1.025); } }
+  .empty { width: 100%; height: 100%; display: grid; place-items: center; background: var(--paper); }
+  .empty span { font: 900 clamp(2.5rem, 6vw, 4rem)/1 var(--font-display); font-variation-settings: "wdth" 72; color: #9aa3b4; letter-spacing: 0.02em; }
+  .tag {
+    position: absolute; right: 18px; bottom: -22px; max-width: calc(100% - 36px);
+    background: var(--paper); border: 1px solid var(--line); padding: 10px 14px; box-shadow: var(--shadow-rest);
+    font: 700 0.8125rem/1.35 var(--font-typed); letter-spacing: 0.04em; text-transform: uppercase; color: var(--paper-ink);
+  }
+  .tag b { display: block; font: 900 1.625rem/1 var(--font-display); font-variation-settings: "wdth" 72; letter-spacing: 0.01em; }
+  .tag span { display: block; margin-top: 4px; overflow-wrap: anywhere; }
+  .compact { padding: 8px; }
+  .compact .clip { left: 22px; top: -18px; width: 18px; height: 54px; }
+  .compact .tag { right: -6px; bottom: -14px; padding: 6px 9px; font-size: 0.6875rem; }
+  .compact .tag b { font-size: 0.9375rem; }
+</style>
